@@ -5,12 +5,18 @@ import { useRef, useState, useEffect } from "react";
 import { Icon, IconButton } from "@react-native-material/core";
 import useDB from "../db/db";
 import Loading from "../loading/loading";
+import { createProvider } from "./provider";
 
 const Browser = ({ navigation }) => {
   const [uri, setUri] = useState("https://google.com/");
   const [enteredURL, setEnteredURL] = useState("");
   const [providerData, setProviderData] = useState(null);
+  const [provider, setProvider] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // const createProvider = () => {
+  //   return 5;
+  // };
 
   const ref = useRef(null);
 
@@ -25,7 +31,7 @@ const Browser = ({ navigation }) => {
 
   useEffect(() => {
     poppulateProviderData();
-  });
+  }, []);
 
   const poppulateProviderData = async () => {
     setIsLoading(true);
@@ -44,7 +50,10 @@ const Browser = ({ navigation }) => {
         };
       }
     });
+
     setProviderData(newProviderData);
+    let myProvider = createProvider(newProviderData);
+    setProvider(myProvider);
     setIsLoading(false);
   };
 
@@ -53,50 +62,16 @@ const Browser = ({ navigation }) => {
   };
 
   const myFunction = `
-    import { ethers } from "https://cdn-cors.ethers.io/lib/ethers-5.5.4.esm.min.js";
+  alert("Creating provider");  
 
-const sendMessage = () => alert("Requested!");
+  const createProvider = async (data) => {
+    
+    window.ethereum = ${JSON.stringify(provider)};
+    alert("Haha");
+  };
 
- const createProvider = async (data) => {
-  const provider = new ethers.providers.JsonRpcProvider(data.network.rpc);
-  provider.chainId = data.network.chainHexId;
-  provider.isMetaMask = true;
-  provider.networkVersion = data.network.chain;
-  provider.selectedAddress = data.publickey;
-  provider._state = {
-    accounts: data.publickey === "" ? [] : [data.publickey],
-    initialized: true,
-    isConnected: true,
-    isPermanentlyDisconnected: false,
-    isUnlocked: true,
-  };
-  provider.send = (args, kwargs) => {
-    if (
-      args.method === "eth_requestAccounts" ||
-      args.method === "requestPermissions" ||
-      args.method === "wallet_requestPermissions" ||
-      args.method === "eth_accounts"
-    ) {
-      console.log("Connection requested...");
-      sendMessage("connectionRequest", null);
-      return connectionRequest;
-    }
-  };
-  provider.request = (args) => {
-    if (
-      args.method === "eth_requestAccounts" ||
-      args.method === "requestPermissions" ||
-      args.method === "wallet_requestPermissions" ||
-      args.method === "eth_accounts"
-    ) {
-      sendMessage("connectionRequest", null);
-      return connectionRequest;
-    }
-  };
-  window.ethereum = provider;
-};
-    createProvider(${providerData});
-  `;
+  createProvider(${JSON.stringify(providerData)});
+`;
 
   if (isLoading || providerData === null || providerData === undefined)
     return <Loading text="loading..." />;

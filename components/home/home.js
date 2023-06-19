@@ -11,32 +11,43 @@ import useDB from "../db/db";
 import { useEffect, useState } from "react";
 
 const Home = ({ navigation }) => {
-  const [password, setPassword] = useState(false);
   const [enteredPassword, setEnteredPassword] = useState(false);
-  const [account, setAccount] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const db = useDB();
 
   useEffect(() => {
+    const handleNavigation = navigation.addListener("focus", () => {
+      checkDB();
+    });
+
+    return () => {
+      handleNavigation.remove();
+    };
+  }, [navigation]);
+
+  const checkDB = () => {
+    setIsLoading(true);
     db.dbRead("account").then((res) => {
       if (
-        res.length > 0 &&
-        res[0]["password"] != null &&
-        res[0]["password"] != undefined
-      )
-        setPassword(true);
-      if (
-        res.length > 0 &&
-        res[0]["privateKey"] != null &&
-        res[0]["privateKey"] != undefined
-      )
-        setAccount(true);
+        res.length === 0 ||
+        res[0]["password"] == null ||
+        res[0]["password"] == undefined
+      ) {
+        navigation.navigate("CreatePassword");
+        return;
+      }
+      if (res[0]["privateKey"] == null || res[0]["privateKey"] == undefined) {
+        navigation.navigate("ImportAccount");
+        return;
+      }
+      setIsLoading(false);
     });
-  }, []);
+  };
 
-  if (!password) navigation.navigate("CreatePassword");
-  if (!account) navigation.navigate("ImportAccount");
   if (!enteredPassword)
     return <EnterPassword back={() => setEnteredPassword(true)} />;
+  if (isLoading) return <Loading text="loading..." />;
 
   return (
     <SafeAreaView style={styles.container}>

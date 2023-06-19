@@ -16,16 +16,17 @@ const useDB = () => {
                 "CREATE TABLE IF NOT EXISTS networks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, chainId TEXT, chainIdHex TEXT, isSelected INTEGER, rpcURL TEXT)",
                 [],
                 async () => {
+                  console.log("adding networks");
                   await Promise.all(
-                    networks.map((network, index) => {
-                      dbAdd("networks", {
+                    networks.map(async (network, index) => {
+                      await dbAdd("networks", {
                         id: index + 1,
                         name: network.name,
                         chainId: network.chainId,
                         chainIdHex: network.chainIdHex,
                         isSelected: network.isSelected,
                         rpcURL: network.rpcURL,
-                      });
+                      }).catch((err) => console.log(err));
                     })
                   );
                   resolve();
@@ -63,9 +64,6 @@ const useDB = () => {
           .map(() => "?")
           .join(",");
 
-        console.log(columns);
-        console.log(placeholders);
-
         tx.executeSql(
           `INSERT INTO ${table} (${columns}) VALUES (${placeholders})`,
           Object.values(values),
@@ -89,10 +87,6 @@ const useDB = () => {
         });
 
         const setClause = setColumns.join(", ");
-
-        console.log(table, setClause, whereClause);
-
-        console.log("trying to update------------------------------------");
 
         const query = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
 

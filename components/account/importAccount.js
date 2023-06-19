@@ -33,8 +33,6 @@ const ImportAccount = ({ navigation }) => {
     // console.log("here--------------------");
     // console.log(signer, publicKey, privateKey);
 
-    console.log("here-------");
-
     db.dbUpdate(
       "account",
       {

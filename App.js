@@ -1,3 +1,4 @@
+import { ethers } from "ethers";
 import Home from "./components/home/home";
 import Sidebar from "./components/sidebar/sidebar";
 import Browser from "./components/browser/browser";
@@ -19,11 +20,11 @@ export default function App() {
   const [loadingtext, setLoadingText] = useState("Initiating wallet...");
 
   useEffect(() => {
+    // const w = ethers.Wallet.createRandom();
+    // console.log({ walletObject: w, mnemonic: w.mnemonic });
     db.dbInit()
-      .then(() => {
-        checkDB();
-      })
-      .catch((err) => setLoadingText("Error. Please restart the app."));
+      .then((res) => checkDB())
+      .catch((err) => console.log(err));
   }, []);
 
   const checkDB = async () => {
@@ -35,10 +36,12 @@ export default function App() {
         setLoading(true);
         setLoadingText("Error. Please restart the app.");
       });
-    console.log("checking networks");
     await db
       .dbRead("networks")
-      .then((res) => setLoading(false))
+      .then((res) => {
+        console.log(res);
+        setLoading(false);
+      })
       .catch((err) => {
         setLoading(true);
         setLoadingText("Error. Please restart the app.");

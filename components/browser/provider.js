@@ -1,8 +1,11 @@
-import { ethers } from "https://cdn-cors.ethers.io/lib/ethers-5.5.4.esm.min.js";
+import "react-native-get-random-values";
+import "@ethersproject/shims";
+import { ethers } from "ethers";
 
 const sendMessage = () => alert("Requested!");
 
 export const createProvider = async (data) => {
+  console.log("Creating provider with ", data.network.rpc);
   const provider = new ethers.providers.JsonRpcProvider(data.network.rpc);
   provider.chainId = data.network.chainHexId;
   provider.isMetaMask = true;
@@ -22,7 +25,6 @@ export const createProvider = async (data) => {
       args.method === "wallet_requestPermissions" ||
       args.method === "eth_accounts"
     ) {
-      console.log("Connection requested...");
       sendMessage("connectionRequest", null);
       return connectionRequest;
     }
@@ -38,5 +40,5 @@ export const createProvider = async (data) => {
       return connectionRequest;
     }
   };
-  window.ethereum = provider;
+  return provider;
 };
