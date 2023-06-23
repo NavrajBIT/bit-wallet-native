@@ -13,37 +13,45 @@ const Sidebar = ({ navigation }) => {
         style={{ backgroundColor: "red", width: 100 }}
         onPress={() => navigation.navigate("Home")}
       />
-
-      <View
-        style={{
-          padding: 10,
-          borderBottomColor: "grey",
-          borderBottomWidth: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 20,
-        }}
-      >
-        <Icon name="account" color="white" size={20} />
-        <Text style={{ color: "white", fontSize: 20 }}>Account details</Text>
-      </View>
-
-      <TouchableOpacity
-        style={{
-          padding: 10,
-          borderBottomColor: "grey",
-          borderBottomWidth: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 20,
-        }}
-        onPress={() => navigation.navigate("Browser")}
-      >
-        <Icon name="web" color="white" size={20} />
-        <Text style={{ color: "white", fontSize: 20 }}>Browser</Text>
-      </TouchableOpacity>
+      <MenuItem
+        menu="Account Details"
+        icon="account"
+        route="AccountDetails"
+        navigation={navigation}
+      />
+      <MenuItem
+        menu="Browser"
+        icon="web"
+        route="Browser"
+        navigation={navigation}
+      />
+      <MenuItem
+        menu="Reset Account"
+        icon="reload"
+        route="ResetAccount"
+        navigation={navigation}
+      />
     </SafeAreaView>
   );
 };
 
 export default Sidebar;
+
+const MenuItem = ({ menu, icon, route, navigation }) => {
+  return (
+    <TouchableOpacity
+      style={{
+        padding: 10,
+        borderBottomColor: "grey",
+        borderBottomWidth: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 20,
+      }}
+      onPress={() => navigation.navigate(route)}
+    >
+      <Icon name={icon} color="white" size={20} />
+      <Text style={{ color: "white", fontSize: 20 }}>{menu}</Text>
+    </TouchableOpacity>
+  );
+};

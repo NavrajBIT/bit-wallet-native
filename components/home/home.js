@@ -5,8 +5,6 @@ import Balancebar from "./balancebar/balancebar";
 import AssetsContainer from "./assetscontainer/assetscontainer";
 import Loading from "../loading/loading";
 import EnterPassword from "../password/enterPassword";
-import CreatePassword from "../password/createPassword";
-import ImportAccount from "../account/importAccount";
 import useDB from "../db/db";
 import { useEffect, useState } from "react";
 
@@ -38,7 +36,7 @@ const Home = ({ navigation }) => {
         return;
       }
       if (res[0]["privateKey"] == null || res[0]["privateKey"] == undefined) {
-        navigation.navigate("ImportAccount");
+        navigation.navigate("NewAccount");
         return;
       }
       setIsLoading(false);

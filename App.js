@@ -4,7 +4,10 @@ import Sidebar from "./components/sidebar/sidebar";
 import Browser from "./components/browser/browser";
 import Loading from "./components/loading/loading";
 import CreatePassword from "./components/password/createPassword";
-import ImportAccount from "./components/account/importAccount";
+import Qrcode from "./components/home/balancebar/qrcode";
+import AccountDetails from "./components/accountDetails/accountDetails";
+import ResetAccount from "./components/resetAccount/resetAccount";
+import NewAccount from "./components/account/newAccount";
 import { IconComponentProvider, Icon } from "@react-native-material/core";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { NavigationContainer } from "@react-navigation/native";
@@ -20,8 +23,6 @@ export default function App() {
   const [loadingtext, setLoadingText] = useState("Initiating wallet...");
 
   useEffect(() => {
-    // const w = ethers.Wallet.createRandom();
-    // console.log({ walletObject: w, mnemonic: w.mnemonic });
     db.dbInit()
       .then((res) => checkDB())
       .catch((err) => console.log(err));
@@ -57,12 +58,52 @@ export default function App() {
           <Stack.Screen
             name="Home"
             component={Home}
-            options={{ headerShown: false }}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="QRcode"
+            component={Qrcode}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="AccountDetails"
+            component={AccountDetails}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="ResetAccount"
+            component={ResetAccount}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
           />
           <Stack.Screen
             name="Sidebar"
             component={Sidebar}
-            options={{ headerShown: false }}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_left",
+            }}
           />
           <Stack.Screen
             name="Browser"
@@ -72,12 +113,22 @@ export default function App() {
           <Stack.Screen
             name="CreatePassword"
             component={CreatePassword}
-            options={{ headerShown: false }}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
           />
           <Stack.Screen
-            name="ImportAccount"
-            component={ImportAccount}
-            options={{ headerShown: false }}
+            name="NewAccount"
+            component={NewAccount}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
           />
         </Stack.Navigator>
       </NavigationContainer>

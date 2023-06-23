@@ -16,7 +16,6 @@ const useDB = () => {
                 "CREATE TABLE IF NOT EXISTS networks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, chainId TEXT, chainIdHex TEXT, isSelected INTEGER, rpcURL TEXT)",
                 [],
                 async () => {
-                  console.log("adding networks");
                   await Promise.all(
                     networks.map(async (network, index) => {
                       await dbAdd("networks", {
@@ -100,7 +99,44 @@ const useDB = () => {
     });
   };
 
-  return { dbInit, dbRead, dbAdd, dbUpdate };
+  const dbReset = () => {
+    const db = SQLite.openDatabase("bitwallet.db");
+    return new Promise((resolve, reject) => {
+      db.transaction((tx) => {
+        const queries = [
+          "DROP TABLE IF EXISTS account",
+          "DROP TABLE IF EXISTS networks",
+        ];
+
+        const promises = queries.map((query) => {
+          return new Promise((resolve, reject) => {
+            tx.executeSql(
+              query,
+              [],
+              (txObj, resultSet) => {
+                console.log(`Table '${query}' deleted`);
+                resolve();
+              },
+              (txObj, error) => {
+                console.log(`Error deleting table '${query}':`, error);
+                reject(error);
+              }
+            );
+          });
+        });
+
+        Promise.all(promises)
+          .then(() => {
+            resolve();
+          })
+          .catch((error) => {
+            reject(error);
+          });
+      });
+    });
+  };
+
+  return { dbInit, dbRead, dbAdd, dbUpdate, dbReset };
 };
 
 export default useDB;

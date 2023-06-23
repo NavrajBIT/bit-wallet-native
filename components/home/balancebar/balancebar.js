@@ -1,7 +1,7 @@
 import { Text, View, Image } from "react-native";
 import { Icon, IconButton, Button } from "@react-native-material/core";
 
-const Balancebar = () => {
+const Balancebar = ({ navigation }) => {
   return (
     <View
       style={{
@@ -22,6 +22,7 @@ const Balancebar = () => {
       <Button
         title="Receive"
         trailing={(props) => <Icon name="arrow-down-left" {...props} />}
+        onPress={() => navigation.navigate("QRcode")}
       />
     </View>
   );

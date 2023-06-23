@@ -8,11 +8,9 @@ import {
 import { Icon, IconButton, Button } from "@react-native-material/core";
 import { useState } from "react";
 import useDB from "../db/db";
-// import "react-native-get-random-values";
-// import "@ethersproject/shims";
-// import { ethers } from "ethers";
+import { ethers } from "ethers";
 
-const ImportAccount = ({ navigation }) => {
+const ImportAccount = ({ setSelectedOption, navigation }) => {
   const [privateKey, setPrivateKey] = useState("");
   const [status, setStatus] = useState("");
   const db = useDB();
@@ -28,17 +26,14 @@ const ImportAccount = ({ navigation }) => {
       setStatus("Invalid Private Key");
       return;
     }
-    // const signer = new ethers.Wallet(privateKey);
-    // const publicKey = await signer.getAddress();
-    // console.log("here--------------------");
-    // console.log(signer, publicKey, privateKey);
+    const signer = new ethers.Wallet(finalPrivateKey);
+    const publicKey = await signer.getAddress();
 
     db.dbUpdate(
       "account",
       {
-        privateKey:
-          "0x0000000000000000000000000000000000000000000000000000000000000002",
-        publicKey: "0x2B5AD5c4795c026514f8317c7a215E218DcCD6cF",
+        privateKey: finalPrivateKey,
+        publicKey: publicKey,
       },
       "id=?",
       [1]
@@ -53,6 +48,7 @@ const ImportAccount = ({ navigation }) => {
         flex: 1,
         backgroundColor: "black",
         padding: 10,
+        justifyContent: "space-between",
       }}
     >
       <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
@@ -97,6 +93,7 @@ const ImportAccount = ({ navigation }) => {
           onPress={handleSubmit}
         />
       </View>
+      <Button title="< Back" onPress={() => setSelectedOption("")} />
     </SafeAreaView>
   );
 };
