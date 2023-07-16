@@ -13,7 +13,7 @@ const useDB = () => {
             const db = SQLite.openDatabase("bitwallet.db");
             db.transaction((tx) => {
               tx.executeSql(
-                "CREATE TABLE IF NOT EXISTS networks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, chainId TEXT, chainIdHex TEXT, isSelected INTEGER, rpcURL TEXT)",
+                "CREATE TABLE IF NOT EXISTS networks (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, chainId TEXT, chainIdHex TEXT, isSelected INTEGER, rpcURL TEXT, account TEXT)",
                 [],
                 async () => {
                   await Promise.all(
@@ -25,6 +25,7 @@ const useDB = () => {
                         chainIdHex: network.chainIdHex,
                         isSelected: network.isSelected,
                         rpcURL: network.rpcURL,
+                        account: network.account,
                       }).catch((err) => console.log(err));
                     })
                   );

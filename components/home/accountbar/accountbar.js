@@ -23,6 +23,11 @@ const Accountbar = () => {
         setShortAccount(shortenAccount(key));
       })
       .catch((err) => console.log(err));
+    db.dbRead("networks")
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => console.log(err));
   }, []);
 
   return (
@@ -41,6 +46,7 @@ const Accountbar = () => {
         trailing={(props) => <Icon name="clipboard" {...props} />}
         variant="text"
         color="white"
+        uppercase={false}
         onPress={() => Clipboard.setStringAsync(account)}
       />
     </View>

@@ -8,12 +8,13 @@ import Qrcode from "./components/home/balancebar/qrcode";
 import AccountDetails from "./components/accountDetails/accountDetails";
 import ResetAccount from "./components/resetAccount/resetAccount";
 import NewAccount from "./components/account/newAccount";
+import Networkselector from "./components/home/navbar/networkselector";
 import { IconComponentProvider, Icon } from "@react-native-material/core";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import useDB from "./components/db/db";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 const Stack = createNativeStackNavigator();
 
@@ -128,6 +129,16 @@ export default function App() {
               presentation: "modal",
               animationTypeForReplace: "push",
               animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="Network"
+            component={Networkselector}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_bottom",
             }}
           />
         </Stack.Navigator>

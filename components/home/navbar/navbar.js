@@ -1,22 +1,30 @@
-import { Text, View, Image, StyleSheet } from "react-native";
+import { Text, View, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { Icon, IconButton, Button } from "@react-native-material/core";
-import DropDownPicker from "react-native-dropdown-picker";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import useDB from "../../db/db";
 
 const Navbar = ({ navigation }) => {
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("apple");
-  const [items, setItems] = useState([
-    { label: "Polygon Mainnet", value: "apple" },
-    { label: "Polygon Testnet", value: "banana" },
-  ]);
+  const [selectedNetwork, setSelectedNetwork] = useState({});
+  const db = useDB();
 
+  useEffect(() => {
+    db.dbRead("networks")
+      .then((res) => {
+        res.map((network) => {
+          if (network.isSelected === 1) {
+            setSelectedNetwork(network);
+          }
+        });
+      })
+      .catch((err) => console.log(err));
+  }, []);
   return (
     <View
       style={{
         flexDirection: "row",
         alignContent: "center",
         alignItems: "center",
+        justifyContent: "space-between",
         padding: 10,
       }}
     >
@@ -26,19 +34,25 @@ const Navbar = ({ navigation }) => {
         onPress={() => navigation.navigate("Sidebar")}
       />
 
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={items}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setItems}
-        containerStyle={{
-          flex: 1,
-          marginLeft: 20,
-          marginRight: 20,
+      <TouchableOpacity
+        style={{
+          width: "40%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderWidth: 1,
+          borderColor: "white",
+          borderRadius: 10,
+          padding: 10,
+          backgroundColor: "rgba(255,255,255,0.2)",
         }}
-      />
+        onPress={() => navigation.navigate("Network")}
+      >
+        <Text style={{ color: "white", fontSize: 15 }}>
+          {selectedNetwork.name}
+        </Text>
+        <Icon name="arrow-down" style={{ color: "white", fontSize: 20 }} />
+      </TouchableOpacity>
       <Image
         source={require("../../../assets/icon.png")}
         style={{ height: 50, width: 40 }}

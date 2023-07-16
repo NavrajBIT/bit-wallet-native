@@ -9,15 +9,15 @@ import { Icon, IconButton, Button } from "@react-native-material/core";
 import { useState, useEffect } from "react";
 import useDB from "../db/db";
 import * as Clipboard from "expo-clipboard";
+import Enterpin from "../password/enterpin";
 
 const ExportPrivateKey = ({ setIsPrivateKey, isPrivetKey }) => {
   const [password, setPassword] = useState("");
-  const [enteredPassword, setEnteredPassword] = useState("");
+  const [status, setStatus] = useState("Enter PIN");
   const [privateKey, setPrivateKey] = useState("");
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
   const db = useDB();
   useEffect(() => {
-    setEnteredPassword("");
     setIsPasswordCorrect(false);
     db.dbRead("account")
       .then((res) => {
@@ -26,6 +26,14 @@ const ExportPrivateKey = ({ setIsPrivateKey, isPrivetKey }) => {
       })
       .catch((err) => setIsPrivateKey(false));
   }, [isPrivetKey]);
+
+  const submitPin = (pin) => {
+    if (pin === password) {
+      setIsPasswordCorrect(true);
+    } else {
+      setStatus("Incorrect PIN");
+    }
+  };
 
   return (
     <SafeAreaView
@@ -45,12 +53,7 @@ const ExportPrivateKey = ({ setIsPrivateKey, isPrivetKey }) => {
         change all your assets and account balance.
       </Text>
       {!isPasswordCorrect ? (
-        <PasswordView
-          setEnteredPassword={setEnteredPassword}
-          enteredPassword={enteredPassword}
-          password={password}
-          setIsPasswordCorrect={setIsPasswordCorrect}
-        />
+        <Enterpin heading={status} submit={submitPin} />
       ) : (
         <PrivateKeyView privateKey={privateKey} />
       )}
@@ -65,43 +68,6 @@ const ExportPrivateKey = ({ setIsPrivateKey, isPrivetKey }) => {
 };
 
 export default ExportPrivateKey;
-
-const PasswordView = ({
-  setEnteredPassword,
-  enteredPassword,
-  password,
-  setIsPasswordCorrect,
-}) => {
-  return (
-    <View style={{ gap: 10 }}>
-      <Text style={{ color: "white", fontSize: 20, textAlign: "left" }}>
-        Password:
-      </Text>
-      <TextInput
-        style={{
-          height: 40,
-          borderWidth: 1,
-          paddingLeft: 10,
-          borderColor: "white",
-          borderRadius: 10,
-          color: "white",
-        }}
-        placeholder="Enter Password..."
-        value={enteredPassword}
-        secureTextEntry
-        onChangeText={(e) => {
-          setEnteredPassword(e);
-        }}
-      />
-      <Button
-        title="Submit"
-        onPress={() => setIsPasswordCorrect(enteredPassword === password)}
-        color="green"
-        style={{ width: 100 }}
-      />
-    </View>
-  );
-};
 
 const PrivateKeyView = ({ privateKey }) => {
   return (

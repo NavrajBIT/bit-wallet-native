@@ -8,10 +8,28 @@ import {
 import { Icon, IconButton, Button } from "@react-native-material/core";
 import { useState, useEffect } from "react";
 import useDB from "../db/db";
-import * as Clipboard from "expo-clipboard";
+import { WebView } from "react-native-webview";
 
 const ResetAccount = ({ navigation }) => {
   const db = useDB();
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [storageCleared, setStorageCleared] = useState(false);
+
+  const clearStorage = () =>
+    new Promise((resolve, reject) => {
+      const checkStorage = () => {
+        console.log("checking...", storageCleared);
+        if (storageCleared) {
+          console.log("storage clear");
+          resolve();
+        } else {
+          setTimeout(checkStorage, 500);
+        }
+      };
+
+      checkStorage();
+    });
+
   return (
     <SafeAreaView
       style={{
@@ -32,7 +50,7 @@ const ResetAccount = ({ navigation }) => {
         <Text style={{ color: "red", fontSize: 20, textAlign: "left" }}>
           All your account data will be deleted and cannot be retrieved in the
           future without the private key. Make sure you have copied your private
-          key or mnemonic phrase before resetting account.
+          key or mnemonic phrase before resetting account.{" "}
         </Text>
       </View>
 
@@ -50,14 +68,43 @@ const ResetAccount = ({ navigation }) => {
           }}
         />
       </View>
-
       <Button
         title="Cancel"
         trailing={(props) => <Icon name="close" {...props} />}
         onPress={() => navigation.navigate("Home")}
       />
+      <DeleteWebView setStorageCleared={setStorageCleared} />
     </SafeAreaView>
   );
 };
 
 export default ResetAccount;
+
+const DeleteWebView = ({ setStorageCleared }) => {
+  const injectFunction = `  
+    localStorage.clear();
+    window.ReactNativeWebView.postMessage(JSON.stringify({type: 'bitwalletcall', message: "Storage cleared"})); 
+  `;
+
+  const handleWebViewMessage = async (e) => {
+    if (e.type === "bitwalletcall") {
+      console.log(e.message);
+      setStorageCleared(true);
+    }
+  };
+
+  return (
+    <View style={{ display: "none" }}>
+      <WebView
+        source={{
+          uri: "https://wallet.near.org/",
+        }}
+        pullToRefreshEnabled={true}
+        injectedJavaScript={injectFunction}
+        onMessage={(event) =>
+          handleWebViewMessage(JSON.parse(event.nativeEvent.data))
+        }
+      />
+    </View>
+  );
+};

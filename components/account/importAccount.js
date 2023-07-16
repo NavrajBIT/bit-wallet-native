@@ -6,96 +6,79 @@ import {
   TextInput,
 } from "react-native";
 import { Icon, IconButton, Button } from "@react-native-material/core";
-import { useState } from "react";
 import useDB from "../db/db";
-import { ethers } from "ethers";
+import { WebView } from "react-native-webview";
 
-const ImportAccount = ({ setSelectedOption, navigation }) => {
-  const [privateKey, setPrivateKey] = useState("");
-  const [status, setStatus] = useState("");
+const CreateAccount = ({ setSelectedOption, navigation }) => {
   const db = useDB();
 
-  const handleSubmit = async () => {
-    setStatus("");
-    let finalPrivateKey;
-    if (privateKey.length === 66) {
-      finalPrivateKey = privateKey;
-    } else if (privateKey.length === 64) {
-      finalPrivateKey = "0x" + privateKey;
-    } else {
-      setStatus("Invalid Private Key");
-      return;
-    }
-    const signer = new ethers.Wallet(finalPrivateKey);
-    const publicKey = await signer.getAddress();
+  function extractPrivateKey(inputString) {
+    const prefix = "ed25519:";
+    const startIndex = inputString.indexOf(prefix) + prefix.length;
 
-    db.dbUpdate(
-      "account",
-      {
-        privateKey: finalPrivateKey,
-        publicKey: publicKey,
-      },
-      "id=?",
-      [1]
-    )
-      .then((res) => navigation.navigate("Home"))
-      .catch((err) => console.log(err));
+    if (startIndex >= prefix.length) {
+      return inputString.substring(startIndex);
+    } else {
+      return "";
+    }
+  }
+
+  const handleWebViewMessage = async (e) => {
+    if (e.type === "bitwalletcall") {
+      if (e.message.privatekey !== undefined && e.message.privatekey !== null) {
+        console.log(e.message.privatekey);
+        console.log(e.message.account);
+        let publicKey = e.message.account;
+        let privateKey = extractPrivateKey(e.message.privatekey);
+        await db.dbUpdate(
+          "account",
+          {
+            publicKey: publicKey,
+            privateKey: privateKey,
+          },
+          "id = ?",
+          [1]
+        );
+        navigation.navigate("Home");
+      }
+    }
   };
 
+  const injectFunction = `
+  const myInterval = setInterval(() => {
+    let data = {
+      languageCode: localStorage.getItem("languageCode"),
+      "near-wallet-selector:recentlySignedInWallets": localStorage.getItem("near-wallet-selector:recentlySignedInWallets"),
+      "wallet.releaseNotesModal:v0.01.2:closed": localStorage.getItem("wallet.releaseNotesModal:v0.01.2:closed"),
+      "_4:wallet:active_account_id_v2": localStorage.getItem("_4:wallet:active_account_id_v2"),
+      "_4:wallet:accounts_v2": localStorage.getItem("_4:wallet:accounts_v2"),
+      "near-wallet-selector:recentlySignedInWallets": localStorage.getItem("near-wallet-selector:recentlySignedInWallets"),
+    }
+
+    if (data["_4:wallet:active_account_id_v2"] !== null) {
+      let account = data["_4:wallet:active_account_id_v2"];
+      let keyword = "nearlib:keystore:" + account + ":default";
+      data[keyword] = localStorage.getItem(keyword);
+      data["account"] = account;
+      data["privatekey"] = localStorage.getItem(keyword);
+    }
+    window.ReactNativeWebView.postMessage(JSON.stringify({type: 'bitwalletcall', message: data}));
+  }, 1000);
+  `;
+
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        padding: 10,
-        justifyContent: "space-between",
-      }}
-    >
-      <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
-        Import Account
-      </Text>
-      <View style={{ marginTop: 100 }}>
-        <Text style={{ color: "white", fontSize: 20, textAlign: "left" }}>
-          Enter Private Key:
-        </Text>
-        <TextInput
-          style={{
-            height: 40,
-            borderWidth: 1,
-            paddingLeft: 10,
-            borderColor: "white",
-            borderRadius: 10,
-            color: "white",
-          }}
-          placeholder="Enter Private Key"
-          value={privateKey}
-          secureTextEntry
-          onChangeText={(e) => {
-            setPrivateKey(e);
-          }}
-        />
-
-        <Text
-          style={{
-            color: "white",
-            fontSize: 20,
-            textAlign: "left",
-            marginTop: 20,
-            color: "red",
-          }}
-        >
-          {status}
-        </Text>
-
-        <Button
-          title="Submit"
-          style={{ backgroundColor: "grey", width: 100, marginTop: 10 }}
-          onPress={handleSubmit}
-        />
-      </View>
-      <Button title="< Back" onPress={() => setSelectedOption("")} />
+    <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
+      <WebView
+        source={{ uri: "https://wallet.near.org/setup-passphrase-new-account" }}
+        pullToRefreshEnabled={true}
+        injectedJavaScript={injectFunction}
+        onMessage={(event) =>
+          handleWebViewMessage(JSON.parse(event.nativeEvent.data))
+        }
+      />
+      <Button title="<< Back" onPress={() => setSelectedOption("")} />
     </SafeAreaView>
   );
 };
 
-export default ImportAccount;
+export default CreateAccount;

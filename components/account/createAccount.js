@@ -6,113 +6,99 @@ import {
   TextInput,
 } from "react-native";
 import { Icon, IconButton, Button } from "@react-native-material/core";
-import { useState, useEffect } from "react";
 import useDB from "../db/db";
-import { generateSecureRandom } from "react-native-securerandom";
-import "react-native-get-random-values";
-import "@ethersproject/shims";
-import { ethers } from "ethers";
-import * as Clipboard from "expo-clipboard";
-import EnterPhrase from "./enterPhrase";
+import { WebView } from "react-native-webview";
 
-const CreateAccount = ({ setSelectedOption, navigation }) => {
-  const [mnemonic, setMnemonic] = useState("loading");
-  const [privateKey, setPrivateKey] = useState("");
-  const [publicKey, setPublicKey] = useState("");
-  const [isEnteringPhrase, setIsEnteringPhrase] = useState(false);
+const CreateAccount = ({
+  selectedOption,
+  setSelectedOption,
+  navigation,
+  selectedNetwork,
+}) => {
+  const db = useDB();
 
-  if (window.crypto == null) {
-    window.crypto = {};
+  function extractPrivateKey(inputString) {
+    const prefix = "ed25519:";
+    const startIndex = inputString.indexOf(prefix) + prefix.length;
+
+    if (startIndex >= prefix.length) {
+      return inputString.substring(startIndex);
+    } else {
+      return "";
+    }
   }
 
-  useEffect(() => {
-    try {
-      let wallet = ethers.Wallet.createRandom();
-      let walletMnemonic = wallet.mnemonic.phrase;
-      setMnemonic(walletMnemonic);
-      setPrivateKey(wallet.privateKey);
-      setPublicKey(wallet.publicKey);
-    } catch (err) {
-      console.log(err);
-      setSelectedOption("");
+  const handleWebViewMessage = async (e) => {
+    if (e.type === "bitwalletcall") {
+      if (e.message.privatekey !== undefined && e.message.privatekey !== null) {
+        console.log(e.message.privatekey);
+        console.log(e.message.account);
+        let publicKey = e.message.account;
+        let privateKey = extractPrivateKey(e.message.privatekey);
+        await db.dbUpdate(
+          "account",
+          {
+            publicKey: publicKey,
+            privateKey: privateKey,
+          },
+          "id = ?",
+          [1]
+        );
+        await db.dbUpdate(
+          "networks",
+          {
+            account: publicKey,
+          },
+          `id = ${selectedNetwork.id}`,
+          []
+        );
+        navigation.navigate("Home");
+      }
     }
-  }, []);
+  };
 
-  if (isEnteringPhrase)
-    return (
-      <EnterPhrase
-        mnemonic={mnemonic}
-        privateKey={privateKey}
-        publicKey={publicKey}
-        setIsEnteringPhrase={setIsEnteringPhrase}
-      />
-    );
+  const injectFunction = `
+  const myInterval = setInterval(() => {
+    let data = {
+      languageCode: localStorage.getItem("languageCode"),
+      "near-wallet-selector:recentlySignedInWallets": localStorage.getItem("near-wallet-selector:recentlySignedInWallets"),
+      "wallet.releaseNotesModal:v0.01.2:closed": localStorage.getItem("wallet.releaseNotesModal:v0.01.2:closed"),
+      "_4:wallet:active_account_id_v2": localStorage.getItem("_4:wallet:active_account_id_v2"),
+      "_4:wallet:accounts_v2": localStorage.getItem("_4:wallet:accounts_v2"),
+      "near-wallet-selector:recentlySignedInWallets": localStorage.getItem("near-wallet-selector:recentlySignedInWallets"),
+    }
+
+    if (data["_4:wallet:active_account_id_v2"] !== null) {
+      let account = data["_4:wallet:active_account_id_v2"];
+      let keyword = "nearlib:keystore:" + account + ":default";
+      data[keyword] = localStorage.getItem(keyword);
+      data["account"] = account;
+      data["privatekey"] = localStorage.getItem(keyword);
+    }
+    window.ReactNativeWebView.postMessage(JSON.stringify({type: 'bitwalletcall', message: data}));
+  }, 1000);
+  `;
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: "black",
-        padding: 10,
-        justifyContent: "space-between",
-      }}
-    >
-      <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
-        Create Account
-      </Text>
-      <View style={{ marginTop: 100 }}>
-        <Text style={{ color: "white", fontSize: 20, textAlign: "left" }}>
-          Secret Phrase:
-        </Text>
-        <TouchableOpacity
-          onPress={() => Clipboard.setStringAsync(mnemonic)}
-          style={{
-            borderColor: "red",
-            borderWidth: 1,
-            height: 300,
-            alignItems: "center",
-            justifyContent: "center",
-            paddingHorizontal: 10,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 30,
-              flexWrap: "wrap",
-              textAlign: "center",
-              color: "white",
-            }}
-          >
-            {mnemonic}
-          </Text>
-        </TouchableOpacity>
-        <Text
-          style={{
-            color: "white",
-            fontSize: 15,
-            textAlign: "left",
-          }}
-        >
-          (Click to copy)
-        </Text>
-        <Text
-          style={{
-            color: "white",
-            fontSize: 20,
-            textAlign: "left",
-          }}
-        >
-          Copy the above secret phrase and keep it safe. It will be required in
-          the next step.
-        </Text>
-
-        <Button
-          title="Next >"
-          style={{ backgroundColor: "grey", width: 100, marginTop: 10 }}
-          onPress={() => setIsEnteringPhrase(true)}
-        />
-      </View>
-      <Button title="< Back" onPress={() => setSelectedOption("")} />
+    <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
+      <WebView
+        source={{
+          uri:
+            selectedOption === "createAccount"
+              ? selectedNetwork.name === "Mainnet"
+                ? "https://wallet.near.org/setup-passphrase-new-account"
+                : "https://testnet.mynearwallet.com/create"
+              : selectedNetwork.name === "Mainnet"
+              ? "https://wallet.near.org/recover-seed-phrase"
+              : "https://testnet.mynearwallet.com/recover-seed-phrase",
+        }}
+        pullToRefreshEnabled={true}
+        injectedJavaScript={injectFunction}
+        onMessage={(event) =>
+          handleWebViewMessage(JSON.parse(event.nativeEvent.data))
+        }
+      />
+      <Button title="<< Back" onPress={() => setSelectedOption("")} />
     </SafeAreaView>
   );
 };

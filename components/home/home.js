@@ -7,6 +7,7 @@ import Loading from "../loading/loading";
 import EnterPassword from "../password/enterPassword";
 import useDB from "../db/db";
 import { useEffect, useState } from "react";
+import { Button } from "@react-native-material/core";
 
 const Home = ({ navigation }) => {
   const [enteredPassword, setEnteredPassword] = useState(false);

@@ -8,14 +8,13 @@ import {
 import { Icon, IconButton, Button } from "@react-native-material/core";
 import { useState } from "react";
 import useDB from "../db/db";
+import Enterpin from "./enterpin";
 
 const EnterPassword = ({ back }) => {
-  const [password, setpassword] = useState("");
-
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Enter PIN");
   const db = useDB();
 
-  const submitPassword = async () => {
+  const submitPassword = async (password) => {
     setStatus("");
 
     let dbpassword;
@@ -25,7 +24,7 @@ const EnterPassword = ({ back }) => {
     });
 
     if (password !== dbpassword) {
-      setStatus("Incorrect Password.");
+      setStatus("Incorrect PIN");
       return;
     }
 
@@ -38,50 +37,11 @@ const EnterPassword = ({ back }) => {
         flex: 1,
         backgroundColor: "black",
         padding: 10,
+        justifyContent: "space-between",
       }}
     >
-      <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
-        Enter Password
-      </Text>
-      <View style={{ marginTop: 100 }}>
-        <Text style={{ color: "white", fontSize: 20, textAlign: "left" }}>
-          Enter Password:
-        </Text>
-        <TextInput
-          style={{
-            height: 40,
-            borderWidth: 1,
-            paddingLeft: 10,
-            borderColor: "white",
-            borderRadius: 10,
-            color: "white",
-          }}
-          placeholder="Enter Password"
-          value={password}
-          secureTextEntry
-          onChangeText={(e) => {
-            setpassword(e);
-          }}
-        />
-
-        <Text
-          style={{
-            color: "white",
-            fontSize: 20,
-            textAlign: "left",
-            marginTop: 20,
-            color: "red",
-          }}
-        >
-          {status}
-        </Text>
-
-        <Button
-          title="Submit"
-          style={{ backgroundColor: "grey", width: 100, marginTop: 10 }}
-          onPress={submitPassword}
-        />
-      </View>
+      <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}></Text>
+      <Enterpin heading={status} submit={submitPassword} />
     </SafeAreaView>
   );
 };

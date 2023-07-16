@@ -70,7 +70,7 @@ const EnterPhrase = ({
             padding: 10,
             justifyContent: "center",
             borderWidth: 1,
-            borderColor: "blue",
+            borderColor: unSelectedArray.length > 0 ? "blue" : "transparent",
             borderRadius: 10,
           }}
         >
@@ -90,7 +90,6 @@ const EnterPhrase = ({
             })}
         </View>
       </View>
-
       <View>
         <Text style={{ color: "white", fontSize: 20, textAlign: "center" }}>
           Selected words:
@@ -103,7 +102,7 @@ const EnterPhrase = ({
             padding: 10,
             justifyContent: "center",
             borderWidth: 1,
-            borderColor: "blue",
+            borderColor: selectedArray.length > 0 ? "blue" : "transparent",
             borderRadius: 10,
           }}
         >

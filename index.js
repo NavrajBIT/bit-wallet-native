@@ -13,12 +13,11 @@ import App from "./App";
 
 if (window.crypto == null) window.crypto = {};
 window.crypto.getRandomValues = function (array) {
-  console.log("Remove this later; just checking to make sure this is used");
   //   const random = generateSecureRandom(array.length);
   //   console.log(random);
   for (let i = 0; i < array.length; i++) {
     // array[i] = random[i];
-    array[i] = 10;
+    array[i] = i;
   }
   console.log(array);
 };

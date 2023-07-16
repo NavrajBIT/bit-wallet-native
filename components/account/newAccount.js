@@ -6,24 +6,34 @@ import {
   TextInput,
 } from "react-native";
 import { Icon, IconButton, Button } from "@react-native-material/core";
-import { useState } from "react";
-import ImportAccount from "./importAccount";
+import { useState, useEffect } from "react";
 import CreateAccount from "./createAccount";
+import useDB from "../db/db";
 
 const NewAccount = ({ navigation }) => {
+  const [selectedNetwork, setSelectedNetwork] = useState({});
   const [selectedOption, setSelectedOption] = useState("");
 
-  if (selectedOption === "importAccount")
-    return (
-      <ImportAccount
-        setSelectedOption={setSelectedOption}
-        navigation={navigation}
-      />
-    );
-  if (selectedOption === "createAccount")
+  const db = useDB();
+
+  useEffect(() => {
+    db.dbRead("networks")
+      .then((res) => {
+        res.map((network) => {
+          if (network.isSelected === 1) {
+            setSelectedNetwork(network);
+          }
+        });
+      })
+      .catch((err) => console.log(err));
+  }, []);
+
+  if (selectedOption !== "")
     return (
       <CreateAccount
+        selectedOption={selectedOption}
         setSelectedOption={setSelectedOption}
+        selectedNetwork={selectedNetwork}
         navigation={navigation}
       />
     );
@@ -41,6 +51,12 @@ const NewAccount = ({ navigation }) => {
       <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
         Welcome to BitWallet
       </Text>
+
+      <NetworkSelector
+        navigation={navigation}
+        selectedNetwork={selectedNetwork}
+      />
+
       <View>
         <Text style={{ color: "white", fontSize: 30 }}>Create New Account</Text>
         <Button
@@ -67,3 +83,34 @@ const NewAccount = ({ navigation }) => {
 };
 
 export default NewAccount;
+
+const NetworkSelector = ({ navigation, selectedNetwork }) => (
+  <View
+    style={{
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+    }}
+  >
+    <Text style={{ color: "white", fontSize: 20 }}>Network:</Text>
+    <TouchableOpacity
+      style={{
+        width: "40%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        borderWidth: 1,
+        borderColor: "white",
+        borderRadius: 10,
+        padding: 10,
+        backgroundColor: "rgba(255,255,255,0.2)",
+      }}
+      onPress={() => navigation.navigate("Network")}
+    >
+      <Text style={{ color: "white", fontSize: 15 }}>
+        {selectedNetwork.name}
+      </Text>
+      <Icon name="arrow-down" style={{ color: "white", fontSize: 20 }} />
+    </TouchableOpacity>
+  </View>
+);
