@@ -18,10 +18,19 @@ const ExportPrivateKey = ({ setIsPrivateKey, isPrivetKey }) => {
   const [isPasswordCorrect, setIsPasswordCorrect] = useState(false);
   const db = useDB();
   useEffect(() => {
+    db.dbRead("networks")
+      .then((networks) => {
+        networks.map((network) => {
+          if (network.isSelected === 1) {
+            setPrivateKey(network.privateKey);
+          }
+        });
+      })
+      .catch((err) => console.log(err));
+
     setIsPasswordCorrect(false);
     db.dbRead("account")
       .then((res) => {
-        setPrivateKey(res[0].privateKey);
         setPassword(res[0].password);
       })
       .catch((err) => setIsPrivateKey(false));

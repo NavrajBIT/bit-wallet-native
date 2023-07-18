@@ -5,6 +5,7 @@ import Browser from "./components/browser/browser";
 import Loading from "./components/loading/loading";
 import CreatePassword from "./components/password/createPassword";
 import Qrcode from "./components/home/balancebar/qrcode";
+import Send from "./components/home/balancebar/send";
 import AccountDetails from "./components/accountDetails/accountDetails";
 import ResetAccount from "./components/resetAccount/resetAccount";
 import NewAccount from "./components/account/newAccount";
@@ -69,6 +70,16 @@ export default function App() {
           <Stack.Screen
             name="QRcode"
             component={Qrcode}
+            options={{
+              headerShown: false,
+              presentation: "modal",
+              animationTypeForReplace: "push",
+              animation: "slide_from_right",
+            }}
+          />
+          <Stack.Screen
+            name="Send"
+            component={Send}
             options={{
               headerShown: false,
               presentation: "modal",

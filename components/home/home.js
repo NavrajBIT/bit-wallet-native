@@ -25,9 +25,9 @@ const Home = ({ navigation }) => {
     };
   }, [navigation]);
 
-  const checkDB = () => {
+  const checkDB = async () => {
     setIsLoading(true);
-    db.dbRead("account").then((res) => {
+    await db.dbRead("account").then((res) => {
       if (
         res.length === 0 ||
         res[0]["password"] == null ||
@@ -36,12 +36,17 @@ const Home = ({ navigation }) => {
         navigation.navigate("CreatePassword");
         return;
       }
-      if (res[0]["privateKey"] == null || res[0]["privateKey"] == undefined) {
-        navigation.navigate("NewAccount");
-        return;
-      }
-      setIsLoading(false);
     });
+    await db.dbRead("networks").then((networks) => {
+      networks.map((network) => {
+        if (network.isSelected === 1) {
+          if (network.privateKey === "" || network.account === "") {
+            navigation.navigate("NewAccount");
+          }
+        }
+      });
+    });
+    setIsLoading(false);
   };
 
   if (!enteredPassword)

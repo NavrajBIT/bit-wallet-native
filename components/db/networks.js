@@ -6,6 +6,7 @@ export const networks = [
     isSelected: 1,
     rpcURL: "https://rpc.mainnet.near.org",
     account: "",
+    privateKey: "",
   },
   {
     name: "Testnet",
@@ -14,5 +15,6 @@ export const networks = [
     isSelected: 0,
     rpcURL: "https://rpc.testnet.near.org",
     account: "",
+    privateKey: "",
   },
 ];

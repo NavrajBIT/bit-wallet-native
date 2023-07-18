@@ -105,6 +105,16 @@ const DeleteWebView = ({ setStorageCleared }) => {
           handleWebViewMessage(JSON.parse(event.nativeEvent.data))
         }
       />
+      <WebView
+        source={{
+          uri: "https://testnet.mynearwallet.com/",
+        }}
+        pullToRefreshEnabled={true}
+        injectedJavaScript={injectFunction}
+        onMessage={(event) =>
+          handleWebViewMessage(JSON.parse(event.nativeEvent.data))
+        }
+      />
     </View>
   );
 };

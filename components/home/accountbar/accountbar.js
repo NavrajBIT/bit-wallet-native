@@ -16,16 +16,15 @@ const Accountbar = () => {
   };
 
   useEffect(() => {
-    db.dbRead("account")
-      .then((res) => {
-        let key = res[0].publicKey;
-        setAccount(key);
-        setShortAccount(shortenAccount(key));
-      })
-      .catch((err) => console.log(err));
     db.dbRead("networks")
-      .then((res) => {
-        console.log(res);
+      .then((networks) => {
+        networks.map((network) => {
+          if (network.isSelected === 1) {
+            let key = network.account;
+            setAccount(key);
+            setShortAccount(shortenAccount(key));
+          }
+        });
       })
       .catch((err) => console.log(err));
   }, []);

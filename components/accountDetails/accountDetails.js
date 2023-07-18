@@ -11,10 +11,15 @@ const AccountDetails = ({ navigation }) => {
   const [isPrivetKey, setIsPrivateKey] = useState("");
   const db = useDB();
   useEffect(() => {
-    db.dbRead("account")
-      .then((res) => {
-        let key = res[0].publicKey;
-        setAccount(key);
+    db.dbRead("networks")
+      .then((networks) => {
+        networks.map((network) => {
+          if (network.isSelected === 1) {
+            let key = network.account;
+
+            setAccount(key);
+          }
+        });
       })
       .catch((err) => console.log(err));
   }, []);
@@ -40,13 +45,14 @@ const AccountDetails = ({ navigation }) => {
       <Text style={{ color: "blue", fontSize: 50, textAlign: "center" }}>
         Account
       </Text>
-      <View style={{ flexDirection: "row", gap: 20 }}>
+      <View style={{ flexDirection: "row", gap: 20, alignItems: "center" }}>
         <Text style={{ color: "white", fontSize: 20, textAlign: "left" }}>
           Account:
         </Text>
         <Button
           title={account}
           trailing={(props) => <Icon name="clipboard" {...props} />}
+          uppercase={false}
           variant="text"
           color="white"
           style={{ marginRight: 20 }}

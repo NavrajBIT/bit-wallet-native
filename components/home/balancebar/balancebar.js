@@ -13,33 +13,32 @@ const Balancebar = ({ navigation }) => {
         networks.map((network) => {
           if (network.isSelected === 1) {
             console.log(network.rpcURL);
-            db.dbRead("account").then((accounts) => {
-              let myAccount = accounts[0]["publicKey"];
-              fetch(network.rpcURL, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
+            let myAccount = network.account;
+
+            fetch(network.rpcURL, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                jsonrpc: "2.0",
+                id: "dontcare",
+                method: "query",
+                params: {
+                  request_type: "view_account",
+                  finality: "final",
+                  account_id: myAccount,
                 },
-                body: JSON.stringify({
-                  jsonrpc: "2.0",
-                  id: "dontcare",
-                  method: "query",
-                  params: {
-                    request_type: "view_account",
-                    finality: "final",
-                    account_id: myAccount,
-                  },
-                }),
-              })
-                .then((res) => res.json())
-                .then((info) => {
-                  let myBalance = info.result.amount;
-                  let floatBalance =
-                    Math.round(parseFloat(myBalance) / 10 ** 22) / 100;
-                  setBalance(floatBalance);
-                })
-                .catch((err) => console.log(err));
-            });
+              }),
+            })
+              .then((res) => res.json())
+              .then((info) => {
+                console.log("info", info);
+                let myBalance = info.result.amount;
+                let floatBalance =
+                  Math.round(parseFloat(myBalance) / 10 ** 22) / 100;
+                setBalance(floatBalance);
+              });
           }
         });
       })
@@ -62,6 +61,7 @@ const Balancebar = ({ navigation }) => {
       <Button
         title="Send"
         trailing={(props) => <Icon name="send" {...props} />}
+        onPress={() => navigation.navigate("Send")}
         style={{ width: "30%" }}
       />
       <View style={{ flex: 1, alignItems: "center", width: "30%" }}>

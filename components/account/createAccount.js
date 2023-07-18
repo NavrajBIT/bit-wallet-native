@@ -35,19 +35,12 @@ const CreateAccount = ({
         console.log(e.message.account);
         let publicKey = e.message.account;
         let privateKey = extractPrivateKey(e.message.privatekey);
-        await db.dbUpdate(
-          "account",
-          {
-            publicKey: publicKey,
-            privateKey: privateKey,
-          },
-          "id = ?",
-          [1]
-        );
+
         await db.dbUpdate(
           "networks",
           {
             account: publicKey,
+            privateKey: privateKey,
           },
           `id = ${selectedNetwork.id}`,
           []
